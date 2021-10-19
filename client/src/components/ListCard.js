@@ -1,6 +1,7 @@
 import { useContext, useState } from 'react'
 import { useHistory } from 'react-router-dom'
 import { GlobalStoreContext } from '../store'
+
 /*
     This is a card in our list of top 5 lists. It lets select
     a list for editing and it has controls for changing its 
@@ -29,6 +30,11 @@ function ListCard(props) {
     function handleToggleEdit(event) {
         event.stopPropagation();
         toggleEdit();
+    }
+
+    function handleDeleteMark(event) {
+        event.stopPropagation();
+        store.markListForDelete(event.target.id.substring("delete-list-".length));
     }
 
     function toggleEdit() {
@@ -76,6 +82,7 @@ function ListCard(props) {
                 type="button"
                 id={"delete-list-" + idNamePair._id}
                 className="list-card-button"
+                onClick={handleDeleteMark}
                 value={"\u2715"}
             />
             <input

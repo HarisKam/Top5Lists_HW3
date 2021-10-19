@@ -17,7 +17,10 @@ export const GlobalStoreActionType = {
     CLOSE_CURRENT_LIST: "CLOSE_CURRENT_LIST",
     LOAD_ID_NAME_PAIRS: "LOAD_ID_NAME_PAIRS",
     SET_CURRENT_LIST: "SET_CURRENT_LIST",
-    SET_LIST_NAME_EDIT_ACTIVE: "SET_LIST_NAME_EDIT_ACTIVE"
+    ADD_NEW_LIST: "ADD_NEW_LIST",
+    SET_LIST_NAME_EDIT_ACTIVE: "SET_LIST_NAME_EDIT_ACTIVE",
+    MARK_LIST_DELETE: "MARK_LIST_DELETE",
+    DELETE_LIST: "DELETE_LIST"
 }
 
 // WE'LL NEED THIS TO PROCESS TRANSACTIONS
@@ -46,6 +49,39 @@ export const useGlobalStore = () => {
                 return setStore({
                     idNamePairs: payload.idNamePairs,
                     currentList: payload.top5List,
+                    newListCounter: store.newListCounter,
+                    isListNameEditActive: false,
+                    isItemEditActive: false,
+                    listMarkedForDeletion: null
+                });
+            }
+            // ADD NEW LIST
+            case GlobalStoreActionType.ADD_NEW_LIST: {
+                return setStore({
+                    idNamePairs: store.idNamePairs,
+                    currentList: payload.currentList,
+                    newListCounter: payload.newListCounter,
+                    isListNameEditActive: false,
+                    isItemEditActive: false,
+                    listMarkedForDeletion: false
+                });
+            }
+            // MARK LIST TO DELETE
+            case GlobalStoreActionType.MARK_LIST_DELETE: {
+                return setStore({
+                    idNamePairs: store.idNamePairs, 
+                    currentList: payload,
+                    newListCounter: store.newListCounter,
+                    isListNameEditActive: false, 
+                    isItemEditActive: false,
+                    listMarkedForDeletion: true
+                });
+            }
+            // DELETE LIST
+            case GlobalStoreActionType.DELETE_LIST: {
+                return setStore({
+                    idNamePairs: payload.idNamePairs,
+                    currentList: null,
                     newListCounter: store.newListCounter,
                     isListNameEditActive: false,
                     isItemEditActive: false,
@@ -137,6 +173,92 @@ export const useGlobalStore = () => {
         asyncChangeListName(id);
     }
 
+    //Add New List
+    store.addList = function () {
+        async function asyncAddList() {
+            let nextKey = JSON.parse(localStorage.getItem("list-key"))
+            if (nextKey == null) {
+                localStorage.setItem("list-key", JSON.stringify({"nextKey" : 2}
+                ));
+                nextKey = 1;
+            }
+            else {
+            let nextKey = JSON.parse(localStorage.getItem("list-key")).nextKey;
+            let newKey = nextKey + 1;
+            localStorage.setItem("list-key", JSON.stringify(
+                {
+                    "nextKey": newKey
+                }
+            ));
+            }
+            let newList = {
+                name: "Untitled" + nextKey.nextKey,
+                items: ["?", "?", "?", "?", "?"]
+            };
+            
+            let response = await api.createTop5List(newList);
+            if (response.data.success) {
+                storeReducer({
+                    type: GlobalStoreActionType.ADD_NEW_LIST, 
+                    payload: {
+                        currentList : response.data.top5List._id,
+                        newListCounter : response.data.top5List.newKey,
+                    }
+                })
+                store.setCurrentList(response.data.top5List._id);
+            }
+        }
+        asyncAddList();
+    }
+    store.showDeleteModal = function() {
+        document.getElementById("delete-modal").classList.add("is-visible");
+    }
+
+    store.hideDeleteModal = function() {
+        document.getElementById("delete-modal").classList.remove("is-visible");
+    }
+
+    // mark list to delete
+    store.markListForDelete = function(list) {
+        store.showDeleteModal();  
+        async function asyncMarkListForDelete(list) {
+            let response = await api.getTop5ListById(list);
+            if (response.data.success) {
+                let top5List = response.data.top5List;
+                storeReducer({
+                    type: GlobalStoreActionType.MARK_LIST_DELETE,
+                    payload: top5List
+                });
+            }
+        }
+        asyncMarkListForDelete(list); 
+    }
+
+    // DELETE LIST
+    store.deleteMarkedList = function() {
+        store.hideDeleteModal();
+        async function asyncDeleteList(){
+            let response = await api.deleteTop5ListById(store.listMarkedForDeletion._id);
+            if (response.data.success) {
+                await api.getTop5ListPairs().then((response) => {
+                    if (response.data.success) {
+                        storeReducer({
+                            type: GlobalStoreActionType.DELETE_LIST, 
+                            payload: {
+                                idNamePairs: response.data.idNamePairs,
+                                top5List: null
+                            }
+                        });
+                    }
+                    store.loadIdNamePairs();
+                });
+            }
+        }
+        asyncDeleteList();
+    }
+
+
+    
     // THIS FUNCTION PROCESSES CLOSING THE CURRENTLY LOADED LIST
     store.closeCurrentList = function () {
         storeReducer({
