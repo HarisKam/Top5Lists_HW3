@@ -22,9 +22,16 @@ function EditToolbar() {
         history.push("/");
         store.closeCurrentList();
     }
-    let editStatus = false;
-    if (store.isListNameEditActive) {
-        editStatus = true;
+    function handleHover() {
+        if (enabledButtonClass = "top5-button")
+        {
+            enabledButtonClass = "top5-button:hover";
+        }
+    }
+    let editStatus = true;
+    if (store.currentList == null ) {
+        editStatus = false;
+        enabledButtonClass = "top5-button-disabled"
     }
     return (
         <div id="edit-toolbar">
@@ -32,6 +39,7 @@ function EditToolbar() {
                 disabled={editStatus}
                 id='undo-button'
                 onClick={handleUndo}
+                onHover={handleHover}
                 className={enabledButtonClass}>
                 &#x21B6;
             </div>
