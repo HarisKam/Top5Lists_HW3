@@ -184,6 +184,7 @@ export const useGlobalStore = () => {
             }
         }
         asyncChangeListName(id);
+        store.loadIdNamePairs();
     }
 
     //Add New List
