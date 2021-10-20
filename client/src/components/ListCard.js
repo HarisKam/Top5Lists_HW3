@@ -33,7 +33,7 @@ function ListCard(props) {
     }
 
     function handleDeleteMark(event) {
-        event.stopPropagation();
+        
         store.markListForDelete(event.target.id.substring("delete-list-".length));
     }
 

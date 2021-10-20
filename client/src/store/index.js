@@ -70,11 +70,11 @@ export const useGlobalStore = () => {
             case GlobalStoreActionType.MARK_LIST_DELETE: {
                 return setStore({
                     idNamePairs: store.idNamePairs, 
-                    currentList: payload,
+                    currentList: null,
                     newListCounter: store.newListCounter,
                     isListNameEditActive: false, 
                     isItemEditActive: false,
-                    listMarkedForDeletion: true
+                    listMarkedForDeletion: payload
                 });
             }
             // DELETE LIST
@@ -96,7 +96,7 @@ export const useGlobalStore = () => {
                     newListCounter: store.newListCounter,
                     isListNameEditActive: false,
                     isItemEditActive: false,
-                    listMarkedForDeletion: null
+                    listMarkedForDeletion: true
                 })
             }
             // GET ALL THE LISTS SO WE CAN PRESENT THEM
@@ -246,7 +246,6 @@ export const useGlobalStore = () => {
                             type: GlobalStoreActionType.DELETE_LIST, 
                             payload: {
                                 idNamePairs: response.data.idNamePairs,
-                                top5List: null
                             }
                         });
                     }
