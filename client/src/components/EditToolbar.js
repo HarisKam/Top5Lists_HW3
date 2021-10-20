@@ -28,11 +28,13 @@ function EditToolbar() {
             enabledButtonClass = "top5-button:hover";
         }
     }
-    let editStatus = true;
+    
+    let editStatus = false;
     if (store.currentList == null ) {
-        editStatus = false;
+        editStatus = true;
         enabledButtonClass = "top5-button-disabled"
     }
+    
     return (
         <div id="edit-toolbar">
             <div
@@ -47,6 +49,7 @@ function EditToolbar() {
                 disabled={editStatus}
                 id='redo-button'
                 onClick={handleRedo}
+                onMouseOver={handleHover}
                 className={enabledButtonClass}>
                 &#x21B7;
             </div>
@@ -54,6 +57,7 @@ function EditToolbar() {
                 disabled={editStatus}
                 id='close-button'
                 onClick={handleClose}
+                onMouseOver={handleHover}
                 className={enabledButtonClass}>
                 &#x24E7;
             </div>
